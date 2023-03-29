@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "247007766209",
+    "project_id": "commutepay-a0052",
+    "storage_bucket": "commutepay-a0052.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:247007766209:android:217be87e67bdae71671640",
+        "android_client_info": {
+          "package_name": "com.example.bus_proj"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "247007766209-ch57v2lqlnqvhh373jq68ig69436qk1d.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAZ2SDo7e3-jtfWQBreyPRUQJ9UIqnxJ8I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "247007766209-ch57v2lqlnqvhh373jq68ig69436qk1d.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
