@@ -1,12 +1,19 @@
+import 'package:bus_proj/helpers/db.dart';
 import 'package:flutter/material.dart';
 
 class TransferMoneyDialog extends StatefulWidget {
+  int balance;
+  String phone;
+  TransferMoneyDialog({required this.balance, required this.phone});
   @override
   _TransferMoneyDialogState createState() => _TransferMoneyDialogState();
 }
 
 class _TransferMoneyDialogState extends State<TransferMoneyDialog> {
   final _formKey = GlobalKey<FormState>();
+  TextEditingController amountController = TextEditingController();
+  TextEditingController recipientAddressController = TextEditingController();
+  TextEditingController messageController = TextEditingController();
 
   String _amount = "";
   String _recipientWalletAddress = "";
@@ -38,6 +45,7 @@ class _TransferMoneyDialogState extends State<TransferMoneyDialog> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TextFormField(
+                controller: amountController,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(labelText: 'Amount'),
                 validator: (value) {
@@ -52,7 +60,8 @@ class _TransferMoneyDialogState extends State<TransferMoneyDialog> {
                 },
               ),
               TextFormField(
-                keyboardType: TextInputType.text,
+                controller: recipientAddressController,
+                keyboardType: TextInputType.phone,
                 decoration:
                     InputDecoration(labelText: 'Recipient Wallet Address'),
                 validator: (value) {
@@ -66,6 +75,7 @@ class _TransferMoneyDialogState extends State<TransferMoneyDialog> {
                 },
               ),
               TextFormField(
+                controller: messageController,
                 keyboardType: TextInputType.text,
                 decoration: InputDecoration(labelText: 'Notes (optional)'),
                 onSaved: (value) {
@@ -87,7 +97,18 @@ class _TransferMoneyDialogState extends State<TransferMoneyDialog> {
         ElevatedButton(
           child: Text('Transfer'),
           onPressed: () {
-            _submitForm();
+            print(_amount == '' ? "empty" : _amount);
+            print(_recipientWalletAddress);
+            transfer({
+              "transferredAmount": amountController.text,
+              "recipientNumber": "+91${recipientAddressController.text}"
+            }).then((value) {
+              updateWalletOnTransfer({
+                "amount": widget.balance - int.parse(amountController.text),
+                "walletId": widget.phone
+              });
+              Navigator.pop(context);
+            });
           },
         ),
       ],

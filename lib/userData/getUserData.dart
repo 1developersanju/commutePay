@@ -54,10 +54,15 @@ class _GetUserDataState extends State<GetUserData> {
             ),
             ElevatedButton(
               onPressed: () async {
-                var userData = {"userName": userNameController.text,"phone":currentuser!.phoneNumber};
-                await db.collection("uid").add(userData);
-                Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => const HomePage()));
+                var userData = {
+                  "userName": userNameController.text,
+                  "phone": currentuser!.phoneNumber
+                };
+
+                updateUser(userData);
+
+                Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(builder: (context) => HomePage()));
               },
               child: Text('Next'),
             ),

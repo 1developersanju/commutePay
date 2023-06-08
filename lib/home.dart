@@ -1,43 +1,38 @@
-import 'package:bus_proj/helpers/constants.dart';
+import 'package:bus_proj/providers/userDataProvider.dart';
 import 'package:bus_proj/sideBarPage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:provider/provider.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
-
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  Position? _currentPosition;
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
-
-  void getCurrentLocation() async {
-    LocationPermission permission;
-    permission = await Geolocator.requestPermission();
-    Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
-        .then((Position position) {
-      setState(() {
-        _currentPosition = position;
-      });
-    }).catchError((e) {
-      print("errrror:$e");
-    });
-  }
-
+class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        extendBodyBehindAppBar: true,
-        body: SidebarPage()
-        );
+    var user = FirebaseAuth.instance.currentUser;
+    final uid = "${user!.uid}";
+    final phoneNumber = "${user.phoneNumber}";
+    final firestoreStreamProvider =
+        Provider.of<FirestoreStreamProvider>(context);
+
+    return StreamBuilder(
+      stream: firestoreStreamProvider.getUserDataStream(uid, phoneNumber),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          var data = snapshot.data;
+          var username = data!["userName"];
+          var phone = data["phone"];
+          return Scaffold(
+              extendBodyBehindAppBar: true,
+              body: SidebarPage(
+                name: username,
+              ));
+        } else if (snapshot.hasError) {
+          // Display error message
+          return Text("Error: ${snapshot.error}");
+        } else {
+          // Display circular progress indicator
+          return CircularProgressIndicator();
+        }
+      },
+    );
   }
 }

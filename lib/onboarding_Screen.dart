@@ -41,7 +41,7 @@ class OnBoardingView extends StatelessWidget {
       ],
       pageRoute: MaterialPageRoute(
         allowSnapshotting: false,
-        builder: (context) => const HomePage(),
+        builder: (context) =>  HomePage(),
       ),
       nextButton: const Text(
         "NEXT",

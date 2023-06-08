@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import 'package:bus_proj/home.dart';
+import 'package:bus_proj/login/authCheck.dart';
 import 'package:bus_proj/login/register.dart';
+import 'package:bus_proj/userData/getUserData.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:pin_input_text_field/pin_input_text_field.dart';
@@ -11,9 +15,15 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  bool readOnly = false;
   final TextEditingController _pinEditingController = TextEditingController();
   TextEditingController phoneController = TextEditingController();
   String? _verificationCode;
+  bool _showTimer = false;
+  late Timer _timer;
+  int _timerSeconds = 60;
+    late String _errorMessage;
+
 
   @override
   void dispose() {
@@ -21,35 +31,64 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
+  void _startTimer() {
+    _timer = Timer.periodic(Duration(seconds: 1), (Timer timer) {
+      setState(() {
+        if (_timerSeconds < 1) {
+          _showTimer = false;
+          _timerSeconds = 60;
+          _timer.cancel();
+        } else {
+          _timerSeconds -= 1;
+        }
+      });
+    });
+  }
+
   _verifyPhone(phone) async {
-    await FirebaseAuth.instance.verifyPhoneNumber(
-        phoneNumber: '+91${phone}',
-        verificationCompleted: (PhoneAuthCredential credential) async {
-          await FirebaseAuth.instance
-              .signInWithCredential(credential)
-              .then((value) async {
-            if (value.user != null) {
-              Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (context) => HomePage()),
-                  (route) => false);
-            }
-          });
-        },
-        verificationFailed: (FirebaseAuthException e) {
-          print(e.message);
-        },
-        codeSent: (String? verficationID, int? resendToken) {
-          setState(() {
-            _verificationCode = verficationID;
-          });
-        },
-        codeAutoRetrievalTimeout: (String verificationID) {
-          setState(() {
-            _verificationCode = verificationID;
-          });
-        },
-        timeout: Duration(seconds: 120));
+    try {
+      await FirebaseAuth.instance.verifyPhoneNumber(
+          phoneNumber: '+91${phone}',
+          verificationCompleted: (PhoneAuthCredential credential) async {
+            await FirebaseAuth.instance
+                .signInWithCredential(credential)
+                .then((value) async {
+              if (value.user != null) {
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => GetUserData()),
+                    (route) => false);
+              }
+            });
+          },
+          verificationFailed: (FirebaseAuthException e) {
+            print(e.message);
+          },
+          codeSent: (String? verficationID, int? resendToken) {
+            print('Verification code sent to phone number');
+            setState(() {
+              _showTimer = true;
+            });
+            _startTimer();
+            setState(() {
+              _verificationCode = verficationID;
+            });
+          },
+          codeAutoRetrievalTimeout: (String verificationID) {
+            setState(() {
+              _verificationCode = verificationID;
+            });
+            print("timeout");
+          },
+          timeout: Duration(seconds: _timerSeconds));
+    } on FirebaseAuthException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              'We have blocked all requests from this device due to unusual activity. Try again later.'),
+        ),
+      );
+    }
   }
 
   @override
@@ -66,10 +105,13 @@ class _LoginPageState extends State<LoginPage> {
                 fontWeight: FontWeight.bold,
               ),
             ),
+            _showTimer ? Text("$_timerSeconds") : SizedBox(),
+
             SizedBox(height: 50),
             Container(
               width: 300,
               child: TextFormField(
+                readOnly: readOnly,
                 controller: phoneController,
                 autofocus: true,
                 keyboardType: TextInputType.phone,
@@ -85,6 +127,9 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 onEditingComplete: () {
                   _verifyPhone(phoneController.text);
+                  setState(() {
+                    readOnly = true;
+                  });
                 },
               ),
             ),
@@ -111,24 +156,13 @@ class _LoginPageState extends State<LoginPage> {
                         .signInWithCredential(PhoneAuthProvider.credential(
                             verificationId: _verificationCode!, smsCode: pin))
                         .then((value) async {
-                      if (value.user != null) {
-                        print("response value ${value.user}");
-                        print(
-                            "response value ${value.additionalUserInfo!.isNewUser}");
-                        SharedPreferences prefs =
-                            await SharedPreferences.getInstance();
+                      print("pin $pin");
 
-                        // prefs.setBool(
-                        //     'isNewUser', value.credential.);
-                        print("isNewUser ${prefs.getBool("isNewUser")}");
-
-                        print("response value ${value.credential!.token}");
-
-                        // Navigator.pushAndRemoveUntil(r
-                        //     context,
-                        //     MaterialPageRoute(builder: (context) => HomePage()),
-                        //     (route) => false);
-                      }
+                      Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => GetUserData()),
+                          (route) => false);
                     });
                   } catch (e) {
                     ScaffoldMessenger.of(context)

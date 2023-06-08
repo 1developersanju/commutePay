@@ -12,14 +12,17 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'Notification/Notif_page.dart';
 
 class SidebarPage extends StatefulWidget {
+  String name;
+  SidebarPage({required this.name});
   @override
   _SidebarPageState createState() => _SidebarPageState();
 }
 
 class _SidebarPageState extends State<SidebarPage> {
   late List<CollapsibleItem> _items;
-  Widget _headline = GoogleMap(
-      initialCameraPosition: CameraPosition(target: LatLng(20.5937, 78.9629)));
+  Widget _headline = WalletView();
+  //  GoogleMap(
+  //     initialCameraPosition: CameraPosition(target: LatLng(20.5937, 78.9629)));
   AssetImage _avatarImg = AssetImage('assets/man.png');
   Position? _currentPosition;
 
@@ -37,21 +40,22 @@ class _SidebarPageState extends State<SidebarPage> {
         text: 'Track',
         icon: Icons.map,
         onPressed: () => setState(() => _headline = GoogleMap(
-              initialCameraPosition:
-                  CameraPosition(target: LatLng(22.5937, 78.9629)),
-              cameraTargetBounds: CameraTargetBounds(LatLngBounds(
-                southwest: LatLng(8.17, 68.75),
-                northeast: LatLng(37.13, 97.40),
-              )),
+              // markers: Marker(markerId: markerId),
+              myLocationEnabled: true,
+              initialCameraPosition: CameraPosition(
+                  target: LatLng(
+                      _currentPosition?.latitude ?? 11.10301344952768,
+                      _currentPosition?.longitude ?? 76.96438295281736),
+                  zoom: 13),
             )),
-        isSelected: true,
       ),
       CollapsibleItem(
           text: 'Wallet',
           icon: Icons.wallet,
           onPressed: () => setState(
                 () => _headline = WalletView(),
-              )),
+              ),
+          isSelected: true),
       CollapsibleItem(
         text: 'History',
         icon: Icons.history,
@@ -87,7 +91,7 @@ class _SidebarPageState extends State<SidebarPage> {
         items: _items,
         avatarImg: const NetworkImage(
             "https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTB8fHBlb3BsZXxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=500&q=60"),
-        title: 'Sanjeev Vivekanandan',
+        title: '${widget.name}',
         onTitleTap: () {},
         body: _headline,
         backgroundColor: Colors.black,

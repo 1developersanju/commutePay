@@ -1,6 +1,14 @@
+import 'package:bus_proj/helpers/db.dart';
 import 'package:flutter/material.dart';
 
 class WalletRechargeDialog extends StatefulWidget {
+  String phoneNo;
+  int balance;
+  bool cardPurchased;
+  WalletRechargeDialog(
+      {required this.phoneNo,
+      required this.balance,
+      required this.cardPurchased});
   @override
   _WalletRechargeDialogState createState() => _WalletRechargeDialogState();
 }
@@ -112,37 +120,55 @@ class _WalletRechargeDialogState extends State<WalletRechargeDialog> {
             isPaymentProcessing
                 ? Center(child: CircularProgressIndicator())
                 : ElevatedButton(
-                    onPressed:
-                        selectedUpiApp == "" || amountController.text == ""
-                            ? null
-                            : () {
+                    onPressed: selectedUpiApp == "" ||
+                            amountController.text == ""
+                        ? null
+                        : widget.cardPurchased == true
+                            ? () {
                                 setState(() {
                                   isPaymentProcessing = true;
                                 });
+                                var balance = int.parse(amountController.text) +
+                                    int.parse(widget.balance.toString());
                                 // TODO: Implement payment logic here
                                 Future.delayed(Duration(seconds: 2), () {
                                   setState(() {
                                     isPaymentProcessing = false;
                                     paymentSuccess = true;
                                   });
+                                  print(balance is int);
+                                  Future.delayed(Duration(seconds: 3), () {
+                                    recharge({
+                                      "phoneNumber": widget.phoneNo,
+                                      "amount": balance,
+                                      "upi": selectedUpiApp
+                                    });
+                                  });
                                   Future.delayed(Duration(seconds: 1), () {
                                     Navigator.pop(context);
                                   });
                                 });
+                              }
+                            : () {
+                                Future.delayed(Duration(seconds: 1), () {
+                                  Navigator.pop(context);
+                                });
                               },
                     child: Text('Proceed'),
                   ),
-            SizedBox(height: 8),
-            paymentSuccess
-                ? Text(
-                    'Payment successful!',
-                    style: TextStyle(
-                      color: Colors.green,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  )
-                : SizedBox.shrink(),
+            const SizedBox(height: 8),
+            widget.cardPurchased == false
+                ? const Text("Purchase a card")
+                : paymentSuccess
+                    ? const Text(
+                        'Payment successful!',
+                        style: TextStyle(
+                          color: Colors.green,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )
+                    : const SizedBox.shrink(),
           ],
         ),
       ),

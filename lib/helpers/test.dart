@@ -29,7 +29,6 @@ class _TestPageState extends State<TestPage> {
       title: 'Scroll Page View Demo',
       home: Scaffold(
         appBar: AppBar(
-          brightness: Brightness.dark,
           backgroundColor: Colors.deepOrange,
           centerTitle: false,
           title: const Text('Scroll Page View Demo'),

@@ -32,7 +32,7 @@ class _HistoryViewState extends State<HistoryView> {
       crossAxisSpacing: 4,
       mainAxisSpacing: 2,
       gridDelegate: const SliverSimpleGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2),
+          crossAxisCount: 1),
       itemCount: historyList.length,
       itemBuilder: (context, index) {
         return GestureDetector(

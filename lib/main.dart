@@ -1,10 +1,14 @@
 import 'package:bus_proj/helpers/test.dart';
 import 'package:bus_proj/home.dart';
+import 'package:bus_proj/login/authCheck.dart';
 import 'package:bus_proj/login/login.dart';
+import 'package:bus_proj/providers/userDataProvider.dart';
 import 'package:bus_proj/test/test_login.dart';
 import 'package:bus_proj/userData/getUserData.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
@@ -25,13 +29,25 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Flutter Demo',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
+    return MultiProvider(
+      providers: [
+        Provider<FirebaseAuth>(
+          create: (_) => FirebaseAuth.instance,
         ),
-        home: GetUserData());
+        StreamProvider<User?>(
+          create: (context) => context.read<FirebaseAuth>().authStateChanges(),
+          initialData: null,
+        ),
+        ChangeNotifierProvider(create: (_) => FirestoreStreamProvider()),
+      ],
+      child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Flutter Demo',
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+          ),
+          home: AuthCheck()),
+    );
     // isNewUser == true ? LoginPage() : const HomePage());
   }
 }
